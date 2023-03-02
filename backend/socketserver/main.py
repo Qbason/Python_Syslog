@@ -1,10 +1,11 @@
+import os
+import socketserver
+import requests
 
 HOST, PORT = "0.0.0.0", 514
 
-REST_API_HOST_POST = 'http://127.0.0.1:8000'
+REST_API_HOST_POST = os.environ.get('REST_API_IP')#'http://127.0.0.1:8000'
 
-import socketserver
-import requests
 
 
 def splitContent(content:str):

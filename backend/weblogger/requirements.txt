@@ -6,3 +6,5 @@ djangorestframework
 pytz
 urllib3
 django-filter
+psycopg2-binary
+tzdata

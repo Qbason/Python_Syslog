@@ -1,10 +1,11 @@
 import React from 'react'
 import axios from 'axios';
 
+
 export default function Main() {
 
 
-    const ip_address = "http://127.0.0.1:8000/"
+    const ip_address = process.env.REACT_APP_IP_ADDRESS//"http://127.0.0.1:8000/"
 
     const [filters,setFilters] = React.useState(
         {

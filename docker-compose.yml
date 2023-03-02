@@ -1,0 +1,101 @@
+version: '3.7'
+services:
+  #database
+  db_backend:
+    image: postgres:14
+    restart: unless-stopped
+    container_name: db_backend
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./backend/postgres-data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+    expose:
+    - 5432
+  # This is for our database management   
+  pgadmin_db_backend:
+    image: "dpage/pgadmin4"
+    restart: unless-stopped
+    container_name: pgadmin_db_backend
+    depends_on:
+      - db_backend
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - PGADMIN_LISTEN_PORT=${PGADMIN_LISTEN_PORT}
+    ports:
+      - "5050:8001"
+    networks:
+      - mynetwork
+  #web -> activate venv makemigrations migrate collectstatic then run apache2ctl
+  #web backend django
+  web_backend:
+    build:
+      context: .
+      dockerfile: ./backend/weblogger/Dockerfile
+    command: bash -c "source /code/myenv_linux/bin/activate
+     && python /code/weblogger/manage.py makemigrations
+      && python weblogger/manage.py migrate
+       && python weblogger/manage.py collectstatic --no-input
+       && apache2ctl -D FOREGROUND"
+        #  && python portfolio_manager/manage.py runserver 0:80"
+    restart: unless-stopped
+    container_name: web_backend
+    volumes:
+      # copy our code to specific place to make changes in time 
+      - ./backend/weblogger:/code/weblogger
+      - ./backend/weblogger/http.conf:/etc/apache2/sites-available/http.conf
+      - ./backend/weblogger/ports.conf:/etc/apache2/ports.conf
+    ports: 
+      - "8000:80"
+    # for setting database: name, login, password 
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - db_backend
+    networks:
+      - mynetwork
+  socket_backend:
+      build:
+        context: .
+        dockerfile: ./backend/socketserver/Dockerfile
+      restart: unless-stopped
+      container_name: socket_backend
+      volumes:
+        # copy our code to specific place to make changes in time 
+        - ./backend/socketserver:/code/socketserver
+      ports: 
+        - "514:514/udp"
+      environment:
+      - REST_API_IP=${REST_API_IP}
+      networks:
+        - mynetwork
+    #frontend reactjs
+  web_frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    restart: unless-stopped
+    container_name: web_frontend
+    volumes:
+      # copy our code to specific place to make changes in time 
+      - ./frontend/build:/code/build
+      # copy our certs https
+      - ./frontend/http.conf:/etc/apache2/sites-available/http.conf
+      - ./frontend/ports.conf:/etc/apache2/ports.conf
+    ports: 
+      - "81:80"
+    depends_on:
+      - web_backend
+    networks:
+      - mynetwork
+
+
+networks:
+  mynetwork:
+    driver: bridge
