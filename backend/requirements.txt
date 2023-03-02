@@ -1,0 +1,7 @@
+coreapi
+coreschema
+Django
+django-cors-headers
+djangorestframework
+pytz
+urllib3
