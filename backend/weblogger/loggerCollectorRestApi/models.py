@@ -18,6 +18,7 @@ class Log(models.Model):
         on_delete=models.CASCADE
     )
     content = models.TextField()
+    types = models.CharField(max_length=100)
     datetime = models.DateTimeField(
         auto_now_add=True
     )
@@ -25,4 +26,5 @@ class Log(models.Model):
     def __str__(self) -> str:
         return f"{self.device.ipaddress} {self.content}"
     
-
+    class Meta:
+        ordering = ['-datetime']

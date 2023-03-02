@@ -1,20 +1,34 @@
 
 HOST, PORT = "0.0.0.0", 514
 
-REST_API_HOST_POST = '127.0.0.1:8000'
+REST_API_HOST_POST = 'http://127.0.0.1:8000'
 
 import socketserver
 import requests
 
 
+def splitContent(content:str):
+
+	index_first_space = content.find(" ") 
+	all_types = content[:index_first_space]
+
+	info = content[index_first_space:]
+
+	return info,all_types
+
+
+
+
 def makeRequest(device,content):
 
 	url = f'{REST_API_HOST_POST}/api/log/'
+	info,all_types = splitContent(content)
 	requests.post(
 		url,
 			data={
 				"device":device,
-				"content":content
+				"content":info,
+				"types":all_types
 			}
 		)
 

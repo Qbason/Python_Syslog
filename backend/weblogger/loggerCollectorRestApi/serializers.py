@@ -19,7 +19,7 @@ class LogSerializer(ModelSerializer):
 
     class Meta:
         model = Log
-        fields = ['id','device','content','datetime']
+        fields = ['id','device','content','datetime','types']
 
 
     def create(self, validated_data:dict):
