@@ -10,7 +10,7 @@ class DeviceSerializer(ModelSerializer):
 
     class Meta:
         model = Device
-        fields = ['id','ipaddress','datetime']
+        fields = ['id','ipaddress']
 
 class LogSerializer(ModelSerializer):
 
