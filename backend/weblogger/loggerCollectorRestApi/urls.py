@@ -1,7 +1,7 @@
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
 
-from .views import LogViewSet, DeviceViewSet
+from .views import LogViewSet, DeviceViewSet, CleanOldLogs
 
 router = DefaultRouter()
 
@@ -17,7 +17,8 @@ router.register(
 
 urlpatterns = [
     
-    path("api/",include(router.urls))
+    path("api/",include(router.urls)),
+    path("api/cleanoldlogs/",CleanOldLogs)
 
 
 ]
