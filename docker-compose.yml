@@ -9,6 +9,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TZ='GMT+1'
+      - PGTZ='GMT+1'
     volumes:
       - ./backend/postgres-data:/var/lib/postgresql/data
     networks:
@@ -49,6 +51,8 @@ services:
       - ./backend/weblogger:/code/weblogger
       - ./backend/weblogger/http.conf:/etc/apache2/sites-available/http.conf
       - ./backend/weblogger/ports.conf:/etc/apache2/ports.conf
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     ports: 
       - "8000:80"
     # for setting database: name, login, password 
@@ -67,10 +71,27 @@ services:
       restart: unless-stopped
       container_name: socket_backend
       volumes:
+        - "/etc/timezone:/etc/timezone:ro"
+        - "/etc/localtime:/etc/localtime:ro"
         # copy our code to specific place to make changes in time 
         - ./backend/socketserver:/code/socketserver
       ports: 
         - "514:514/udp"
+      environment:
+      - REST_API_IP=${REST_API_IP}
+      networks:
+        - mynetwork
+  eventer_backend:
+      build:
+        context: .
+        dockerfile: ./backend/eventer/Dockerfile
+      restart: unless-stopped
+      container_name: eventer_backend
+      volumes:
+        - "/etc/timezone:/etc/timezone:ro"
+        - "/etc/localtime:/etc/localtime:ro"
+        # copy our code to specific place to make changes in time 
+        - ./backend/eventer:/code/eventer
       environment:
       - REST_API_IP=${REST_API_IP}
       networks:
@@ -83,13 +104,15 @@ services:
     restart: unless-stopped
     container_name: web_frontend
     volumes:
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
       # copy our code to specific place to make changes in time 
       - ./frontend/build:/code/build
       # copy our certs https
       - ./frontend/http.conf:/etc/apache2/sites-available/http.conf
       - ./frontend/ports.conf:/etc/apache2/ports.conf
     ports: 
-      - "81:80"
+      - "80:80"
     depends_on:
       - web_backend
     networks:
