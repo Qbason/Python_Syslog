@@ -10,6 +10,8 @@ from rest_framework import filters
 from .models import Log,Device 
 from .serializers import DeviceSerializer,LogSerializer
 from datetime import datetime, timedelta
+from datetime import datetime
+
 
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
@@ -18,9 +20,22 @@ class DeviceViewSet(viewsets.ModelViewSet):
 class LogViewSet(viewsets.ModelViewSet):
     queryset = Log.objects.all()
     serializer_class = LogSerializer
-    filterset_fields = ['device', 'content','datetime']
-    filter_backends = [DjangoFilterBackend,filters.SearchFilter]
-    search_fields = ['device__ipaddress', 'content','datetime']
+    filterset_fields = ['device']
+    filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+
+        queryset = Log.objects.all()
+        search = self.request.query_params.get('search')
+        if search is not None:
+            try:
+                dt = datetime.strptime(search,"%Y-%m-%d")
+                return queryset.filter(datetime__date=dt)
+            except Exception:
+                return queryset
+        return queryset
+
+
 
     def perform_create(self, serializer):
         
