@@ -14,7 +14,7 @@ print("Program started...")
 while True:
 
     temp_time = datetime.datetime.now()
-    if(temp_time.hour==19 and temp_time.minute==22):
+    if(temp_time.hour==19 and temp_time.minute==22 and temp_time.day==1):
         error = ""
         try:
             r1 = requests.get(
